@@ -1,386 +1,186 @@
-# PowerPointPOSH — PowerShell PowerPoint Presentation Automation
+# MSPowerPoint-CLI-Agent
 
-COM automation of Microsoft PowerPoint presentations.  
-**127 public functions** across 20 categories — no MCP server needed.  
-AI agents call functions directly via the terminal.
+> **Automate Microsoft PowerPoint from plain English inside VS Code — no MCP server, no Python, no extra processes.**
 
----
+![Platform: Windows](https://img.shields.io/badge/platform-Windows-blue?logo=windows)
+![PowerShell: 5.1+](https://img.shields.io/badge/PowerShell-5.1%2B-blue?logo=powershell)
+![VS Code](https://img.shields.io/badge/VS%20Code-GitHub%20Copilot%20Chat-blueviolet?logo=visual-studio-code)
+![Functions: 127](https://img.shields.io/badge/functions-127-brightgreen)
+![Module Version](https://img.shields.io/badge/version-1.0.0-orange)
+![License: MIT](https://img.shields.io/badge/license-MIT-green)
 
-## Quick Start
+## What is this?
+
+**MSPowerPoint-CLI-Agent** is a VS Code agent (powered by GitHub Copilot Chat) that lets you talk to Microsoft PowerPoint in plain language. You describe what you want and the agent translates it into PowerShell commands that manipulate your `.pptx` / `.pptm` presentation live via COM — no manual VBA editing required.
+
+```text
+You:   "Add a new blank slide and put a rectangle with 'Hello World' on it"
+Agent: → New-PowerPointSlide → Add-PowerPointShape → Set-PowerPointText → confirms success
+```
+
+The **PowerPointPOSH** module (included) provides **127 public functions** across 20 categories covering presentations, slides, shapes, text, tables, charts, media, animations, transitions, slide shows, formatting, export, masters, metadata, VBA/VBE, SmartArt, hyperlinks, and sections.
+
+## How it works
+
+```
+VS Code Copilot Chat (agent mode)
+        │
+        ▼
+  powerpoint-dev agent (.md instructions)
+        │  describes which PowerShell command to run
+        ▼
+  PowerPointPOSH module  (imported in the VS Code terminal)
+        │  COM calls via PowerPoint Object Model
+        ▼
+  Microsoft PowerPoint (.pptx / .pptm)
+```
+
+- **No separate server** — the module runs directly in the VS Code integrated terminal.
+- **No Python / Node** — pure PowerShell 5.1+ on Windows.
+- **Full COM access** — everything you can do from VBA, you can do from the agent.
+- **-WhatIf / -Confirm** — all state-changing functions support PowerShell's standard risk-mitigation flags.
+- **Pester tests** — 20 test files cover every public command group.
+
+## Prerequisites
+
+| Requirement | Details |
+|---|---|
+| **OS** | Windows 10 / 11 (COM automation is Windows-only) |
+| **Microsoft PowerPoint** | PowerPoint 2016, 2019, 2021, or Microsoft 365 (desktop) |
+| **PowerShell** | 5.1 (Windows PowerShell) **or** PowerShell 7+ |
+| **VS Code** | Latest stable, with the **GitHub Copilot Chat** extension |
+| **Copilot** | An active GitHub Copilot subscription |
+
+## Setup
+
+### 1 — Clone the repo
 
 ```powershell
-Import-Module .\PowerPointPOSH\PowerPointPOSH.psd1 -Force
-Open-PowerPointPresentation -PresentationPath "C:\deck.pptx" -AsJson
-Get-PowerPointSlide -AsJson
-New-PowerPointSlide -Layout 'blank' -AsJson
-Add-PowerPointShape -SlideIndex 2 -ShapeType 'rectangle' -Left 100 -Top 100 -Width 200 -Height 100 -AsJson
-Set-PowerPointText -SlideIndex 2 -ShapeName "Rectangle 1" -Text "Hello World" -AsJson
-Export-PowerPointToPdf -FilePath "C:\output.pdf" -AsJson
-Close-PowerPointPresentation
+git clone https://github.com/jcolozzi/MSPowerPoint-CLI-Agent.git
 ```
 
----
+### 2 — Install the agent instructions
 
-## Requirements
+Choose **one** of the following:
 
-| Requirement | Version |
-|---|---|
-| OS | Windows |
-| PowerPoint | Microsoft 365 (desktop) |
-| PowerShell | 5.1+ |
+#### Option A — User-level (available in every workspace)
 
----
-
-## Function Categories
-
-| # | Category | Count | Description |
-|---|---|---|---|
-| 1 | Application | 3 | App info, settings, tips |
-| 2 | Presentation | 8 | Open, new, save, close, info, copy, convert, repair |
-| 3 | Slide | 10 | CRUD, layout, notes, background, placeholders |
-| 4 | Shape | 14 | Add/remove/modify shapes, group, align, z-order |
-| 5 | Text | 8 | Read/write/format text, find/replace, bullets |
-| 6 | Table | 7 | Add tables, read/write cells, format |
-| 7 | Chart | 6 | Add/modify charts, set data |
-| 8 | Image & Media | 7 | Pictures, audio, video, export slide images |
-| 9 | Animation | 7 | Add/remove/configure animations |
-| 10 | Transition | 4 | Set/get/remove slide transitions |
-| 11 | SlideShow | 6 | Start/stop/navigate presentations |
-| 12 | Formatting | 7 | Fill, line, shadow, effects, size, position |
-| 13 | Export | 6 | PDF, images, video, HTML |
-| 14 | Master & Layout | 5 | Slide masters, custom layouts |
-| 15 | Metadata | 7 | Properties, comments, tags |
-| 16 | Print | 3 | Page setup, print |
-| 17 | VBE | 7 | VBA code read/write/execute (macro-enabled only) |
-| 18 | SmartArt | 4 | Add/modify SmartArt graphics |
-| 19 | Hyperlink | 3 | Add/get/remove hyperlinks |
-| 20 | Section | 5 | Manage presentation sections |
-
-**Total: 127 functions**
-
----
-
-## Full Function Reference
-
-### Application (3)
-
-| Function | Description |
-|---|---|
-| `Get-PowerPointApplication` | Returns running PowerPoint app info (version, build, visible state) |
-| `Set-PowerPointApplication` | Configures app-level settings (visible, display alerts) |
-| `Get-PowerPointTips` | Lists tips and gotchas for PowerPoint COM automation |
-
-### Presentation (8)
-
-| Function | Description |
-|---|---|
-| `Open-PowerPointPresentation` | Opens an existing presentation file |
-| `New-PowerPointPresentation` | Creates a new blank presentation |
-| `Save-PowerPointPresentation` | Saves the active presentation |
-| `Close-PowerPointPresentation` | Closes the active presentation and optionally quits the app |
-| `Get-PowerPointPresentationInfo` | Returns presentation metadata (slide count, size, path) |
-| `Copy-PowerPointPresentation` | Saves a copy of the active presentation to a new path |
-| `Convert-PowerPointPresentation` | Converts between formats (pptx, pptm, ppt, potx, ppsx) |
-| `Repair-PowerPointPresentation` | Attempts to repair a corrupted presentation |
-
-### Slide (10)
-
-| Function | Description |
-|---|---|
-| `Get-PowerPointSlide` | Lists all slides with index, layout, name, and shape count |
-| `New-PowerPointSlide` | Adds a new slide with specified layout |
-| `Remove-PowerPointSlide` | Deletes a slide by index |
-| `Copy-PowerPointSlide` | Duplicates a slide within or across presentations |
-| `Move-PowerPointSlide` | Moves a slide to a new position |
-| `Set-PowerPointSlideLayout` | Changes the layout of an existing slide |
-| `Get-PowerPointSlideNotes` | Reads the notes pane text for a slide |
-| `Set-PowerPointSlideNotes` | Sets or appends text in the notes pane |
-| `Set-PowerPointSlideBackground` | Sets slide background (solid, gradient, image) |
-| `Get-PowerPointPlaceholder` | Lists placeholders on a slide with type and position |
-
-### Shape (14)
-
-| Function | Description |
-|---|---|
-| `Add-PowerPointShape` | Adds an AutoShape (rectangle, oval, arrow, etc.) |
-| `Get-PowerPointShape` | Lists shapes on a slide with name, type, position, size |
-| `Remove-PowerPointShape` | Deletes a shape by name or index |
-| `Set-PowerPointShapePosition` | Moves a shape to specified left/top coordinates |
-| `Set-PowerPointShapeSize` | Resizes a shape (width, height) |
-| `Copy-PowerPointShape` | Duplicates a shape on the same or different slide |
-| `Group-PowerPointShape` | Groups multiple shapes into a single group |
-| `Ungroup-PowerPointShape` | Ungroups a grouped shape |
-| `Set-PowerPointShapeZOrder` | Changes z-order (bring to front, send to back, etc.) |
-| `Align-PowerPointShape` | Aligns shapes relative to each other or the slide |
-| `Distribute-PowerPointShape` | Distributes shapes evenly (horizontal or vertical) |
-| `Rotate-PowerPointShape` | Rotates a shape by angle or flip direction |
-| `Lock-PowerPointShape` | Locks a shape to prevent accidental editing |
-| `Rename-PowerPointShape` | Renames a shape |
-
-### Text (8)
-
-| Function | Description |
-|---|---|
-| `Get-PowerPointText` | Reads text content from a shape or placeholder |
-| `Set-PowerPointText` | Writes text to a shape or placeholder |
-| `Format-PowerPointText` | Applies font formatting (bold, italic, size, color, font name) |
-| `Add-PowerPointTextBox` | Adds a text box shape with specified text |
-| `Find-PowerPointText` | Searches for text across slides |
-| `Replace-PowerPointText` | Find and replace text across slides |
-| `Set-PowerPointBullet` | Configures bullet/numbering for a text frame |
-| `Set-PowerPointParagraphFormat` | Sets paragraph alignment, spacing, and indentation |
-
-### Table (7)
-
-| Function | Description |
-|---|---|
-| `Add-PowerPointTable` | Inserts a table with specified rows and columns |
-| `Get-PowerPointTableCell` | Reads cell values from a table |
-| `Set-PowerPointTableCell` | Writes a value to a table cell |
-| `Get-PowerPointTable` | Returns full table data as a structured object |
-| `Format-PowerPointTableCell` | Formats cell text (font, size, color, alignment) |
-| `Set-PowerPointTableStyle` | Applies a built-in table style |
-| `Add-PowerPointTableRow` | Adds a row to an existing table |
-
-### Chart (6)
-
-| Function | Description |
-|---|---|
-| `Add-PowerPointChart` | Inserts a chart (column, bar, line, pie, etc.) |
-| `Get-PowerPointChart` | Reads chart configuration and data range |
-| `Set-PowerPointChartData` | Updates chart data from arrays or CSV |
-| `Set-PowerPointChartStyle` | Applies chart style, title, legend, axis formatting |
-| `Set-PowerPointChartType` | Changes chart type of an existing chart |
-| `Export-PowerPointChart` | Exports a chart as an image file |
-
-### Image & Media (7)
-
-| Function | Description |
-|---|---|
-| `Add-PowerPointImage` | Inserts an image from file path |
-| `Add-PowerPointAudio` | Embeds an audio clip |
-| `Add-PowerPointVideo` | Embeds a video clip |
-| `Set-PowerPointMediaPlayback` | Configures media playback settings (autoplay, loop) |
-| `Get-PowerPointMedia` | Lists media objects on a slide |
-| `Export-PowerPointSlideImage` | Exports a slide as a PNG/JPG image |
-| `Set-PowerPointImageCrop` | Crops an image shape |
-
-### Animation (7)
-
-| Function | Description |
-|---|---|
-| `Add-PowerPointAnimation` | Adds an animation effect to a shape |
-| `Get-PowerPointAnimation` | Lists animations on a slide with sequence and timing |
-| `Remove-PowerPointAnimation` | Removes an animation from a shape |
-| `Set-PowerPointAnimationTiming` | Configures animation duration, delay, and repeat |
-| `Set-PowerPointAnimationTrigger` | Sets trigger type (on click, with previous, after previous) |
-| `Set-PowerPointAnimationOrder` | Reorders animation sequence |
-| `Copy-PowerPointAnimation` | Copies animation settings between shapes |
-
-### Transition (4)
-
-| Function | Description |
-|---|---|
-| `Set-PowerPointTransition` | Applies a transition effect to a slide |
-| `Get-PowerPointTransition` | Reads current transition settings for a slide |
-| `Remove-PowerPointTransition` | Removes transition from a slide |
-| `Set-PowerPointTransitionTiming` | Configures transition duration and advance settings |
-
-### SlideShow (6)
-
-| Function | Description |
-|---|---|
-| `Start-PowerPointSlideShow` | Starts the slide show from a specified slide |
-| `Stop-PowerPointSlideShow` | Ends the running slide show |
-| `Set-PowerPointSlideShowSettings` | Configures show type, range, and looping |
-| `Invoke-PowerPointSlideShowNavigate` | Navigates to a specific slide during the show |
-| `Get-PowerPointSlideShowStatus` | Returns current slide show state and position |
-| `Set-PowerPointSlideShowTimings` | Sets rehearsed timings for auto-advance |
-
-### Formatting (7)
-
-| Function | Description |
-|---|---|
-| `Set-PowerPointFill` | Sets shape fill (solid, gradient, pattern, picture) |
-| `Set-PowerPointLine` | Configures shape outline (color, weight, dash style) |
-| `Set-PowerPointShadow` | Applies shadow effect to a shape |
-| `Set-PowerPointEffect` | Applies 3D, reflection, or glow effects |
-| `Set-PowerPointShapeStyle` | Applies a built-in shape style |
-| `Get-PowerPointFormatting` | Reads current formatting properties of a shape |
-| `Reset-PowerPointFormatting` | Resets shape formatting to layout defaults |
-
-### Export (6)
-
-| Function | Description |
-|---|---|
-| `Export-PowerPointToPdf` | Exports presentation as PDF |
-| `Export-PowerPointToImages` | Exports all slides as image files |
-| `Export-PowerPointToVideo` | Exports presentation as MP4 video |
-| `Export-PowerPointToHtml` | Exports presentation as HTML |
-| `Export-PowerPointSlide` | Exports a single slide in a specified format |
-| `Export-PowerPointHandout` | Exports a handout layout (multiple slides per page) |
-
-### Master & Layout (5)
-
-| Function | Description |
-|---|---|
-| `Get-PowerPointSlideMaster` | Lists slide masters in the presentation |
-| `Get-PowerPointSlideLayout` | Lists available layouts from a slide master |
-| `New-PowerPointSlideLayout` | Creates a custom layout |
-| `Set-PowerPointSlideMasterElement` | Modifies elements on a slide master |
-| `Copy-PowerPointSlideMaster` | Copies a slide master from another presentation |
-
-### Metadata (7)
-
-| Function | Description |
-|---|---|
-| `Get-PowerPointProperty` | Reads built-in document properties (title, author, etc.) |
-| `Set-PowerPointProperty` | Sets built-in or custom document properties |
-| `Get-PowerPointComment` | Lists comments on a slide |
-| `Add-PowerPointComment` | Adds a comment to a slide |
-| `Remove-PowerPointComment` | Removes a comment |
-| `Get-PowerPointTag` | Reads custom tags on slides or shapes |
-| `Set-PowerPointTag` | Sets custom tags on slides or shapes |
-
-### Print (3)
-
-| Function | Description |
-|---|---|
-| `Get-PowerPointPageSetup` | Returns slide size and orientation |
-| `Set-PowerPointPageSetup` | Sets slide size (standard, widescreen, custom) |
-| `Invoke-PowerPointPrint` | Prints the presentation |
-
-### VBE (7)
-
-| Function | Description |
-|---|---|
-| `Get-PowerPointVbaCode` | Reads VBA module code |
-| `Set-PowerPointVbaCode` | Writes or replaces VBA module code |
-| `Add-PowerPointVbaModule` | Adds a new VBA module |
-| `Remove-PowerPointVbaModule` | Removes a VBA module |
-| `Invoke-PowerPointVbaMacro` | Executes a VBA macro by name |
-| `Get-PowerPointVbaReference` | Lists VBA project references |
-| `Add-PowerPointVbaReference` | Adds a VBA reference by GUID or file path |
-
-### SmartArt (4)
-
-| Function | Description |
-|---|---|
-| `Add-PowerPointSmartArt` | Inserts a SmartArt graphic |
-| `Get-PowerPointSmartArt` | Reads SmartArt layout and node data |
-| `Set-PowerPointSmartArtNode` | Modifies text or properties of a SmartArt node |
-| `Set-PowerPointSmartArtLayout` | Changes the SmartArt layout type |
-
-### Hyperlink (3)
-
-| Function | Description |
-|---|---|
-| `Add-PowerPointHyperlink` | Adds a hyperlink to a shape or text range |
-| `Get-PowerPointHyperlink` | Lists hyperlinks on a slide |
-| `Remove-PowerPointHyperlink` | Removes a hyperlink from a shape |
-
-### Section (5)
-
-| Function | Description |
-|---|---|
-| `Get-PowerPointSection` | Lists all sections in the presentation |
-| `Add-PowerPointSection` | Adds a new section at a slide index |
-| `Remove-PowerPointSection` | Removes a section (slides remain) |
-| `Rename-PowerPointSection` | Renames a section |
-| `Move-PowerPointSection` | Moves a section to a new position |
-
----
-
-## Architecture
-
+Copy the `.agent.md` file from the repo root to:
 ```
-PowerPointPOSH/
-├── PowerPointPOSH.psd1          # Module manifest — exports 127 functions
-├── PowerPointPOSH.psm1          # Root module — constants, session state, dot-sourcing, cleanup
-├── Private/
-│   ├── Session.ps1              # COM session management (launch, attach, release)
-│   └── Utilities.ps1            # Value conversion, enum mapping, JSON output formatting
-└── Public/
-    ├── ApplicationOps.ps1       # 3 functions
-    ├── PresentationOps.ps1      # 8 functions
-    ├── SlideOps.ps1             # 10 functions
-    ├── ShapeOps.ps1             # 14 functions
-    ├── TextOps.ps1              # 8 functions
-    ├── TableOps.ps1             # 7 functions
-    ├── ChartOps.ps1             # 6 functions
-    ├── ImageMediaOps.ps1        # 7 functions
-    ├── AnimationOps.ps1         # 7 functions
-    ├── TransitionOps.ps1        # 4 functions
-    ├── SlideShowOps.ps1         # 6 functions
-    ├── FormattingOps.ps1        # 7 functions
-    ├── ExportOps.ps1            # 6 functions
-    ├── MasterLayoutOps.ps1      # 5 functions
-    ├── MetadataOps.ps1          # 7 functions
-    ├── PrintOps.ps1             # 3 functions
-    ├── VbeOps.ps1               # 7 functions
-    ├── SmartArtOps.ps1          # 4 functions
-    ├── HyperlinkOps.ps1         # 3 functions
-    └── SectionOps.ps1           # 5 functions
+C:\Users\%USERNAME%\AppData\Roaming\Code\User\prompts\
 ```
 
-### Session Management
+#### Option B — Workspace-level (scoped to this project)
 
-The module maintains a single `$script:PowerPointSession` hashtable:
+Copy the `.agent.md` file into a `.github\agents\` folder in your workspace root. VS Code automatically detects any `.md` files in that folder as custom agents.
 
-- **App** — The PowerPoint `Application` COM object
-- **Presentation** — The active `Presentation` COM object
-- **PresentationPath** — Full path to the open file
+> [!NOTE]
+> VS Code detects any `.md` files in the `.github/agents/` folder of your workspace as custom agents.
 
-`Open-PowerPointPresentation` creates the session. `Close-PowerPointPresentation` releases COM references and optionally quits the app. The module's `OnRemove` handler calls `[System.Runtime.InteropServices.Marshal]::ReleaseComObject()` for deterministic cleanup.
+### 3 — Update the module path inside the agent file
 
-### COM Cleanup
-
-All public functions wrap COM access in `try/finally` blocks. Intermediate COM objects (slides, shapes, ranges) are released after use. `Remove-Module PowerPointPOSH` triggers the cleanup handler automatically.
-
----
-
-## Testing
+Open the `.agent.md` file and replace the placeholder path with the actual path to `PowerPointPOSH.psd1` on your machine:
 
 ```powershell
+# Before
+Import-Module "C:\path\to\PowerPointPOSH\PowerPointPOSH.psd1"
+
+# After (example)
+Import-Module "C:\Projects\MSPowerPoint-agent\PowerPointPOSH\PowerPointPOSH.psd1"
+```
+
+### 4 — Select the agent and start prompting
+
+In VS Code Copilot Chat, click the agent picker and choose **powerpoint-dev**. Open (or have the agent open) a `.pptx` file, then start describing what you want.
+
+## Usage examples
+
+| Prompt | Functions called |
+|---|---|
+| "Open my presentation deck.pptx" | `Open-PowerPointPresentation` |
+| "Add a new slide with a title layout" | `New-PowerPointSlide` |
+| "Put a rectangle on slide 2 at position (100, 100)" | `Add-PowerPointShape` |
+| "Set the text in Rectangle 1 to 'Hello World'" | `Set-PowerPointText` |
+| "Insert a bar chart on slide 3 with this data" | `Add-PowerPointChart` |
+| "Add a fade transition to all slides" | `Set-PowerPointTransition` |
+| "Export the presentation as PDF" | `Export-PowerPointToPdf` |
+| "Show me the VBA code in Module1" | `Get-PowerPointVbaCode` |
+| "Add an entrance animation to the title shape" | `Add-PowerPointAnimation` |
+| "Export all slides as PNG images" | `Export-PowerPointToImages` |
+| "Insert an image from C:\logo.png on slide 1" | `Add-PowerPointImage` |
+| "What would happen if I ran New-PowerPointSlide? (dry run)" | `New-PowerPointSlide -WhatIf` |
+
+## Project structure
+
+```text
+MSPowerPoint-agent/
+├── PowerPointPOSH/              # PowerShell module (the engine)
+│   ├── PowerPointPOSH.psd1     # Module manifest (v1.0.0, PS 5.1+, Desktop + Core)
+│   ├── PowerPointPOSH.psm1     # Module loader
+│   ├── Public/                  # 20 files — one per command category
+│   │   ├── ApplicationOps.ps1
+│   │   ├── PresentationOps.ps1
+│   │   ├── SlideOps.ps1
+│   │   ├── ShapeOps.ps1
+│   │   └── ...
+│   └── Private/                 # Internal helpers (COM session, error formatting, etc.)
+├── Tests/                       # Pester test suite — 20 test files
+│   ├── PowerPointPOSH.Module.Tests.ps1
+│   ├── SlideOps.Tests.ps1
+│   └── ...
+├── .agent.md                    # Agent instructions (the Copilot Chat prompt)
+└── README.md
+```
+
+## Running the tests
+
+```powershell
+# From the repo root
 Invoke-Pester .\Tests\ -Output Detailed
 ```
 
-The test suite includes:
+> Requires [Pester](https://github.com/pester/Pester) 5.x: `Install-Module Pester -MinimumVersion 5.0 -Force`
 
-- **PowerPointPOSH.Module.Tests.ps1** — Module-level tests (manifest, exports, function naming)
-- **20 domain test files** — One per category (e.g., `SlideOps.Tests.ps1`, `ShapeOps.Tests.ps1`)
+## Function reference
 
-Tests mock the COM layer and validate parameter binding, error handling, and JSON output structure.
+<details>
+<summary><strong>View all 127 public functions</strong></summary>
 
----
+| Category | Functions |
+|---|---|
+| **Application** | `Get-PowerPointApplication`, `Set-PowerPointApplication`, `Get-PowerPointTips` |
+| **Presentation** | `Open-PowerPointPresentation`, `New-PowerPointPresentation`, `Save-PowerPointPresentation`, `Close-PowerPointPresentation`, `Get-PowerPointPresentationInfo`, `Copy-PowerPointPresentation`, `Convert-PowerPointPresentation`, `Repair-PowerPointPresentation` |
+| **Slide** | `Get-PowerPointSlide`, `New-PowerPointSlide`, `Remove-PowerPointSlide`, `Copy-PowerPointSlide`, `Move-PowerPointSlide`, `Set-PowerPointSlideLayout`, `Get-PowerPointSlideNotes`, `Set-PowerPointSlideNotes`, `Set-PowerPointSlideBackground`, `Get-PowerPointPlaceholder` |
+| **Shape** | `Add-PowerPointShape`, `Get-PowerPointShape`, `Remove-PowerPointShape`, `Set-PowerPointShapePosition`, `Set-PowerPointShapeSize`, `Copy-PowerPointShape`, `Group-PowerPointShape`, `Ungroup-PowerPointShape`, `Set-PowerPointShapeZOrder`, `Align-PowerPointShape`, `Distribute-PowerPointShape`, `Rotate-PowerPointShape`, `Lock-PowerPointShape`, `Rename-PowerPointShape` |
+| **Text** | `Get-PowerPointText`, `Set-PowerPointText`, `Format-PowerPointText`, `Add-PowerPointTextBox`, `Find-PowerPointText`, `Replace-PowerPointText`, `Set-PowerPointBullet`, `Set-PowerPointParagraphFormat` |
+| **Table** | `Add-PowerPointTable`, `Get-PowerPointTableCell`, `Set-PowerPointTableCell`, `Get-PowerPointTable`, `Format-PowerPointTableCell`, `Set-PowerPointTableStyle`, `Add-PowerPointTableRow` |
+| **Chart** | `Add-PowerPointChart`, `Get-PowerPointChart`, `Set-PowerPointChartData`, `Set-PowerPointChartStyle`, `Set-PowerPointChartType`, `Export-PowerPointChart` |
+| **Image & Media** | `Add-PowerPointImage`, `Add-PowerPointAudio`, `Add-PowerPointVideo`, `Set-PowerPointMediaPlayback`, `Get-PowerPointMedia`, `Export-PowerPointSlideImage`, `Set-PowerPointImageCrop` |
+| **Animation** | `Add-PowerPointAnimation`, `Get-PowerPointAnimation`, `Remove-PowerPointAnimation`, `Set-PowerPointAnimationTiming`, `Set-PowerPointAnimationTrigger`, `Set-PowerPointAnimationOrder`, `Copy-PowerPointAnimation` |
+| **Transition** | `Set-PowerPointTransition`, `Get-PowerPointTransition`, `Remove-PowerPointTransition`, `Set-PowerPointTransitionTiming` |
+| **SlideShow** | `Start-PowerPointSlideShow`, `Stop-PowerPointSlideShow`, `Set-PowerPointSlideShowSettings`, `Invoke-PowerPointSlideShowNavigate`, `Get-PowerPointSlideShowStatus`, `Set-PowerPointSlideShowTimings` |
+| **Formatting** | `Set-PowerPointFill`, `Set-PowerPointLine`, `Set-PowerPointShadow`, `Set-PowerPointEffect`, `Set-PowerPointShapeStyle`, `Get-PowerPointFormatting`, `Reset-PowerPointFormatting` |
+| **Export** | `Export-PowerPointToPdf`, `Export-PowerPointToImages`, `Export-PowerPointToVideo`, `Export-PowerPointToHtml`, `Export-PowerPointSlide`, `Export-PowerPointHandout` |
+| **Master & Layout** | `Get-PowerPointSlideMaster`, `Get-PowerPointSlideLayout`, `New-PowerPointSlideLayout`, `Set-PowerPointSlideMasterElement`, `Copy-PowerPointSlideMaster` |
+| **Metadata** | `Get-PowerPointProperty`, `Set-PowerPointProperty`, `Get-PowerPointComment`, `Add-PowerPointComment`, `Remove-PowerPointComment`, `Get-PowerPointTag`, `Set-PowerPointTag` |
+| **Print** | `Get-PowerPointPageSetup`, `Set-PowerPointPageSetup`, `Invoke-PowerPointPrint` |
+| **VBE** | `Get-PowerPointVbaCode`, `Set-PowerPointVbaCode`, `Add-PowerPointVbaModule`, `Remove-PowerPointVbaModule`, `Invoke-PowerPointVbaMacro`, `Get-PowerPointVbaReference`, `Add-PowerPointVbaReference` |
+| **SmartArt** | `Add-PowerPointSmartArt`, `Get-PowerPointSmartArt`, `Set-PowerPointSmartArtNode`, `Set-PowerPointSmartArtLayout` |
+| **Hyperlink** | `Add-PowerPointHyperlink`, `Get-PowerPointHyperlink`, `Remove-PowerPointHyperlink` |
+| **Section** | `Get-PowerPointSection`, `Add-PowerPointSection`, `Remove-PowerPointSection`, `Rename-PowerPointSection`, `Move-PowerPointSection` |
 
-## Agent Integration
+</details>
 
-AI agents interact with PowerPointPOSH through terminal commands:
+All state-changing functions support `-WhatIf` and `-Confirm` via PowerShell's standard `ShouldProcess` mechanism.
 
-```powershell
-# Agent imports the module
-Import-Module .\PowerPointPOSH\PowerPointPOSH.psd1 -Force
+## Contributing
 
-# All commands return structured JSON with -AsJson
-$slides = Get-PowerPointSlide -AsJson | ConvertFrom-Json
+Pull requests are welcome. For significant changes, open an issue first to discuss what you would like to change. Please include or update Pester tests for any new or modified functions.
 
-# Agents parse JSON to make decisions
-$emptySlides = $slides | Where-Object { $_.ShapeCount -eq 0 }
-```
+## Credits
 
-Key patterns for agents:
-- **Always use `-AsJson`** — Returns structured JSON instead of PowerShell objects
-- **Absolute paths** — Use full paths for file operations
-- **One presentation at a time** — The session model supports a single active presentation
-- **Error responses** — Failures return JSON with `success: false` and an error message
+- PowerShell port and VS Code agent integration: PowerPointPOSH
 
----
+## License
 
-## Known Limitations
-
-- **Single-presentation model** — Only one presentation can be open per session
-- **Desktop PowerPoint required** — COM automation requires the full desktop application; PowerPoint Online is not supported
-- **VBE Trust Center** — VBA operations require "Trust access to the VBA project object model" to be enabled in Trust Center settings
-- **No concurrent access** — COM is single-threaded; do not run multiple PowerPointPOSH sessions simultaneously
-- **Large media files** — Embedding large videos may be slow via COM; consider linking instead
+[MIT](LICENSE) © 2026 PowerPointPOSH
